@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mṛgendratantra — Yogapāda · Sentence Reader</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --noun: #1d4ed8;
+    --noun-bg: #dbeafe;
+    --noun-ul: #93c5fd;
+    --verb: #b91c1c;
+    --verb-bg: #fee2e2;
+    --verb-ul: #fca5a5;
+    --ptcp: #047857;
+    --ptcp-bg: #d1fae5;
+    --ptcp-ul: #6ee7b7;
+    --cmpd: #6d28d9;
+    --cmpd-bg: #ede9fe;
+    --cmpd-ul: #c4b5fd;
+    --indecl: #b45309;
+    --indecl-bg: #fef3c7;
+    --indecl-ul: #fcd34d;
+    --pron: #0e7490;
+    --pron-bg: #cffafe;
+    --pron-ul: #67e8f9;
+    --abstr: #be185d;
+    --abstr-bg: #fce7f3;
+    --abstr-ul: #f9a8d4;
+
+    --bg: #f8f7f6;
+    --card: #ffffff;
+    --text: #1c1917;
+    --text2: #57534e;
+    --text3: #a8a29e;
+    --border: #e7e5e4;
+    --border2: #d6d3d1;
+    --verse-accent: #1e40af;
+    --comm-accent: #7c3aed;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Crimson Pro', Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 2.5rem 1rem 4rem;
+  }
+
+  .container { max-width: 920px; margin: 0 auto; }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 { font-size: 2.1rem; font-weight: 600; letter-spacing: -0.02em; }
+  header .sub { font-size: 1.1rem; color: var(--text2); font-style: italic; margin-top: 0.2rem; }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem; justify-content: center;
+    margin-bottom: 2.5rem; padding: 0.85rem 1.4rem;
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 0.74rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.3rem; }
+  .legend-sw { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ═══════════════ VERSE CARD (mūla) ═══════════════ */
+  .verse-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--verse-accent);
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    overflow: visible;          /* ← tooltips won't clip */
+    position: relative;
+  }
+  .verse-header {
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.85rem 1.4rem;
+    background: #eff6ff; border-bottom: 1px solid #dbeafe;
+  }
+  .verse-num {
+    font-family: 'Inter', sans-serif; font-size: 0.68rem; font-weight: 700;
+    color: white; background: var(--verse-accent);
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .verse-label {
+    font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500; color: #1e40af;
+  }
+  .type-tag {
+    display: inline-block; padding: 0.08rem 0.45rem; border-radius: 3px;
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    margin-left: 0.5rem;
+  }
+  .tag-verse { background: #dbeafe; color: #1e40af; }
+  .tag-comm  { background: #f3e8ff; color: #6d28d9; }
+
+  .verse-body { padding: 1.5rem 1.5rem 1.2rem; }
+
+  /* ═══════════════ COMMENTARY CARD (nested) ═══════════════ */
+  .comm-card {
+    background: #faf9ff;
+    border: 1px solid #e9e5f5;
+    border-left: 3px solid var(--comm-accent);
+    border-radius: 8px;
+    margin: 0.8rem 0 0.8rem 1.5rem;
+    overflow: visible;
+    position: relative;
+  }
+  .comm-header {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.65rem 1.2rem;
+    background: #f5f3ff; border-bottom: 1px solid #e9e5f5;
+  }
+  .comm-marker {
+    font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 700;
+    color: var(--comm-accent); background: #ede9fe;
+    padding: 0.15rem 0.45rem; border-radius: 3px;
+  }
+  .comm-label {
+    font-family: 'Inter', sans-serif; font-size: 0.75rem; color: #6d28d9;
+  }
+  .comm-body { padding: 1.2rem 1.3rem 1rem; }
+
+  /* Connector line from verse to commentary */
+  .comm-card::before {
+    content: '';
+    position: absolute;
+    left: -1.5rem; top: 1.2rem;
+    width: 1.2rem; height: 1px;
+    background: #d4d0e8;
+  }
+
+  /* ── Sanskrit Block ── */
+  .sk-block {
+    font-size: 1.3rem; line-height: 2.2;
+    margin-bottom: 1.2rem;
+    padding: 1rem 1.2rem;
+    background: #fafaf9; border-radius: 8px; border: 1px solid #f0efed;
+    position: relative;
+    overflow: visible;       /* ← tooltips */
+  }
+
+  /* ── Tokens ── */
+  .t {
+    display: inline; position: relative;
+    cursor: pointer; border-radius: 3px;
+    padding: 0.04em 0.12em;
+    transition: background 0.12s;
+    white-space: nowrap;
+  }
+  .t.noun     { color: var(--noun);   border-bottom: 2px solid var(--noun-ul); }
+  .t.noun:hover { background: var(--noun-bg); }
+  .t.verb     { color: var(--verb);   border-bottom: 2px solid var(--verb-ul); }
+  .t.verb:hover { background: var(--verb-bg); }
+  .t.ptcp     { color: var(--ptcp);   border-bottom: 2px solid var(--ptcp-ul); }
+  .t.ptcp:hover { background: var(--ptcp-bg); }
+  .t.cmpd     { color: var(--cmpd);   border-bottom: 2px solid var(--cmpd-ul); }
+  .t.cmpd:hover { background: var(--cmpd-bg); }
+  .t.indecl   { color: var(--indecl); border-bottom: 2px solid var(--indecl-ul); }
+  .t.indecl:hover { background: var(--indecl-bg); }
+  .t.pron     { color: var(--pron);   border-bottom: 2px solid var(--pron-ul); }
+  .t.pron:hover { background: var(--pron-bg); }
+  .t.abstr    { color: var(--abstr);  border-bottom: 2px solid var(--abstr-ul); }
+  .t.abstr:hover { background: var(--abstr-bg); }
+
+  .g {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.52rem; font-weight: 600;
+    vertical-align: super; margin-left: 1px; opacity: 0.65;
+  }
+
+  /* ── Tooltip (FIXED: positioned via JS, appended to body) ── */
+  .tip {
+    display: none;
+    position: fixed;
+    background: #1c1917; color: #fafaf9;
+    padding: 0.65rem 0.9rem; border-radius: 9px;
+    font-family: 'Inter', sans-serif; font-size: 0.76rem; line-height: 1.55;
+    z-index: 9999;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    pointer-events: none;
+    max-width: 360px;
+    width: max-content;
+  }
+  .tip.show { display: block; }
+  .tip .tw { font-weight: 600; font-size: 0.88rem; color: #fbbf24; display: block; margin-bottom: 0.15rem; }
+  .tip .tg { color: #a8a29e; font-size: 0.66rem; display: block; margin-bottom: 0.15rem; }
+  .tip .tr { color: #86efac; font-size: 0.7rem; display: block; margin-bottom: 0.1rem; }
+  .tip .tm { color: #e7e5e4; }
+
+  /* ── Verse-break (within a single śloka) ── */
+  .vbr { display: block; height: 0.3rem; }
+  .caesura { display: inline-block; width: 2em; }
+  .danda { color: var(--text3); margin: 0 0.15em; }
+
+  /* ── Word-by-word (with Sanskrit) ── */
+  .wbw {
+    margin-bottom: 0.8rem;
+    font-size: 1.02rem;
+    line-height: 1.9;
+    color: var(--text);
+  }
+  .wbw-title {
+    font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text3); margin-bottom: 0.35rem;
+  }
+  .wbw em { font-style: italic; color: var(--text2); }
+  .wbw .sk-inline {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* ── Smooth translation ── */
+  .transl {
+    font-size: 1.25rem; font-style: italic; color: var(--text);
+    margin-bottom: 1.2rem; padding: 0.75rem 1.15rem;
+    border-left: 3px solid var(--border2); background: #fafaf9;
+    border-radius: 0 6px 6px 0;
+    line-height: 1.8;
+  }
+
+  /* ── Tab system (one replaces another) ── */
+  .tabs-bar {
+    display: flex; flex-wrap: wrap; gap: 0; margin-bottom: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab-btn {
+    font-family: 'Inter', sans-serif; font-size: 0.76rem; font-weight: 500;
+    color: var(--text2); background: none; border: none;
+    padding: 0.5rem 0.9rem; cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--verse-accent); border-bottom-color: var(--verse-accent); font-weight: 600;
+  }
+  .comm-card .tab-btn.active {
+    color: var(--comm-accent); border-bottom-color: var(--comm-accent);
+  }
+
+  .tab-panel { display: none; padding: 0.8rem 0 0.2rem; animation: fadeUp 0.18s ease; }
+  .tab-panel.active { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Tree ── */
+  .tree { font-family: 'Inter', sans-serif; font-size: 0.8rem; line-height: 1.65; }
+  .tree ul { list-style: none; padding-left: 1.8rem; position: relative; }
+  .tree > ul { padding-left: 0; }
+  .tree li { position: relative; padding: 0.12rem 0; }
+  .tree ul li::before {
+    content: ''; position: absolute; left: -1.2rem; top: 0;
+    height: 100%; width: 1px; background: #d6d3d1;
+  }
+  .tree ul li::after {
+    content: ''; position: absolute; left: -1.2rem; top: 0.82em;
+    width: 0.9rem; height: 1px; background: #d6d3d1;
+  }
+  .tree ul li:last-child::before { height: 0.82em; }
+
+  .nw {
+    font-weight: 600; padding: 0.08rem 0.35rem; border-radius: 4px;
+    font-size: 0.78rem;
+  }
+  .nw.c-verb  { background: var(--verb-bg); color: var(--verb); }
+  .nw.c-noun  { background: var(--noun-bg); color: var(--noun); }
+  .nw.c-ptcp  { background: var(--ptcp-bg); color: var(--ptcp); }
+  .nw.c-cmpd  { background: var(--cmpd-bg); color: var(--cmpd); }
+  .nw.c-indecl { background: var(--indecl-bg); color: var(--indecl); }
+  .nw.c-pron  { background: var(--pron-bg); color: var(--pron); }
+  .nw.c-abstr { background: var(--abstr-bg); color: var(--abstr); }
+  .nr { color: var(--text2); font-size: 0.7rem; margin-left: 0.3rem; }
+  .ng { color: #78716c; font-style: italic; margin-left: 0.3rem; font-size: 0.76rem; }
+
+  /* ── Sandhi ── */
+  .sandhi-box {
+    padding: 0.75rem 1rem; background: #fffbeb;
+    border: 1px solid #fde68a; border-radius: 8px; margin: 0.3rem 0;
+    font-size: 0.82rem; font-family: 'Inter', sans-serif;
+  }
+  .sandhi-box .sh-title {
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: #92400e; margin-bottom: 0.3rem;
+  }
+  .si { margin-bottom: 0.15rem; }
+  .sf { font-weight: 600; }
+  .sa { color: #d97706; margin: 0 0.3rem; }
+  .st { color: var(--text2); }
+  .sr { color: #78716c; font-size: 0.7rem; }
+
+  /* ── Vocab ── */
+  .vocab-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.4rem; padding: 0.3rem 0;
+  }
+  .ve {
+    display: flex; align-items: baseline; gap: 0.4rem;
+    padding: 0.35rem 0.6rem; background: #fafaf9;
+    border-radius: 5px; border: 1px solid #f0efed; font-size: 0.86rem;
+  }
+  .ve-w { font-weight: 600; white-space: nowrap; }
+  .ve-r { font-family: 'Inter', sans-serif; font-size: 0.65rem; color: var(--ptcp); white-space: nowrap; }
+  .ve-m { color: var(--text2); font-size: 0.82rem; }
+
+  /* ── Notes ── */
+  .note-box {
+    padding: 0.75rem 1rem; background: #f0fdf4;
+    border: 1px solid #bbf7d0; border-radius: 8px; margin: 0.3rem 0;
+    font-size: 0.9rem;
+  }
+  .note-box .n-title {
+    font-family: 'Inter', sans-serif; font-size: 0.68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: #166534; margin-bottom: 0.25rem;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    body { padding: 1rem 0.5rem; }
+    .sk-block { font-size: 1.08rem; padding: 0.7rem; }
+    .comm-card { margin-left: 0.5rem; }
+    .vocab-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Mṛgendratantra — Yogapāda</h1>
+  <div class="sub">with the vṛtti of Bhaṭṭa Nārāyaṇakaṇṭha · Sentence-by-Sentence Reader</div>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-sw" style="background:var(--verb)"></div> Finite Verb</div>
+  <div class="legend-item"><div class="legend-sw" style="background:var(--noun)"></div> Noun</div>
+  <div class="legend-item"><div class="legend-sw" style="background:var(--abstr)"></div> Abstract (-tva/-tā)</div>
+  <div class="legend-item"><div class="legend-sw" style="background:var(--cmpd)"></div> Compound</div>
+  <div class="legend-item"><div class="legend-sw" style="background:var(--ptcp)"></div> Participle / Adj</div>
+  <div class="legend-item"><div class="legend-sw" style="background:var(--pron)"></div> Pronoun</div>
+  <div class="legend-item"><div class="legend-sw" style="background:var(--indecl)"></div> Indeclinable</div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║  1 · MAṄGALAŚLOKA (complete verse)                          ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="verse-card" id="v1">
+  <div class="verse-header">
+    <div class="verse-num">1</div>
+    <div class="verse-label">Maṅgalaśloka <span class="type-tag tag-verse">mūla</span></div>
+  </div>
+  <div class="verse-body">
+
+    <div class="sk-block">
+      <!-- pāda a -->
+      <span class="t verb" data-tip="prabhavati|verb · 3sg pres. indic.|√bhū + pra- (1P)|arises, originates, comes forth">prabhavati<span class="g">3sg</span></span>
+      <span class="t pron" data-tip="yataḥ|rel. pron. · abl. sg.||from which, from whom">yataḥ<span class="g">abl</span></span>
+      <span class="t abstr" data-tip="sarvajñatvam|abstract noun · nom. sg. n.|sarva 'all' + jña (√jñā) + -tva|omniscience">sarvajñatvam<span class="g">nom</span></span>
+      <span class="t pron" data-tip="yataḥ|rel. pron. · abl. sg.||from whom">yataḥ<span class="g">abl</span></span>
+      <span class="t abstr" data-tip="akhilakartṛtā|compound (a-khila + kartṛ + -tā) · nom. sg. f.|√kṛ → kartṛ 'agent'|universal agency">akhilakartṛtā<span class="g">nom</span></span>
+      <span class="vbr"></span>
+      <!-- pāda b -->
+      <span class="t verb" data-tip="prasarati|verb · 3sg pres. indic.|√sṛ + pra- (1P)|extends forth, spreads out">prasarati<span class="g">3sg</span></span>
+      <span class="t indecl" data-tip="tathā|indeclinable||likewise, in the same way">tathā</span>
+      <span class="t noun" data-tip="kārye|noun · loc. sg. n.|√kṛ → kārya (gerundive)|in action, in every task">kārye<span class="g">loc</span></span>
+      <span class="t indecl" data-tip="ca|enclitic indecl.||and">ca</span>
+      <span class="t pron" data-tip="asau|dem. pron. · nom. sg. f. (adas)||that [well-known]">asau<span class="g">nom</span></span>
+      <span class="t ptcp" data-tip="parā|adj. · nom. sg. f.||supreme, transcendent">parā<span class="g">nom</span></span>
+      <span class="t noun" data-tip="pratibhā|noun · nom. sg. f.|√bhā + prati-|intuition, creative insight">pratibhā<span class="g">nom</span></span>
+      <span class="t pron" data-tip="yataḥ|rel. pron. · abl.||from whom">yataḥ<span class="g">abl</span></span>
+      <span class="danda">|</span>
+      <span class="vbr"></span>
+      <!-- pāda c -->
+      <span class="t cmpd" data-tip="nirupadhi|bahuvrīhi adj. · nom. sg. n.|nis- + upadhi 'condition'|unconditioned, without limiting adjuncts">nirupadhi</span>
+      <span class="t ptcp" data-tip="param|adj. · nom. sg. n.||supreme, highest">param<span class="g">nom</span></span>
+      <span class="t ptcp" data-tip="śāntam|PPP → adj. · nom. sg. n.|√śam (4P)|peaceful, stilled">śāntam<span class="g">nom</span></span>
+      <span class="t noun" data-tip="dhāma|noun · nom/acc. sg. n.|√dhā|abode, radiance, light">dhāma<span class="g">nom</span></span>
+      <span class="t verb" data-tip="smarāmi|verb · 1sg pres. indic.|√smṛ (1P)|I remember, I meditate upon">smarāmi<span class="g">1sg</span></span>
+      <span class="t pron" data-tip="tad|dem. pron. · acc. sg. n.||that (resolves the triple yataḥ)">tad<span class="g">acc</span></span>
+      <span class="t noun" data-tip="īśituḥ|agent noun · gen. sg. m.|√īś (2P) + -tṛ|of the Lord, of the ruler">īśituḥ<span class="g">gen</span></span>
+      <span class="vbr"></span>
+      <!-- pāda d -->
+      <span class="t pron" data-tip="svayam|reflexive pron. / indecl.||himself">svayam</span>
+      <span class="t indecl" data-tip="api|emphatic particle||even, also">api</span>
+      <span class="t noun" data-tip="vibhoḥ|noun/adj. · gen. sg. m.|vi- + √bhū|of the all-pervading one">vibhoḥ<span class="g">gen</span></span>
+      <span class="t noun" data-tip="vāgīśvaryāḥ|noun · gen. sg. f.|vāc + īśvarī|of Vāgīśvarī, Goddess of Speech">vāgīśvaryāḥ<span class="g">gen</span></span>
+      <span class="t noun" data-tip="girām|noun · gen. pl. f.|√gṝ → gir|of words, of speeches">girām<span class="g">gen.pl</span></span>
+      <span class="t pron" data-tip="yad|rel. pron. · nom. sg. n.||which (refers to dhāma)">yad<span class="g">nom</span></span>
+      <span class="t cmpd" data-tip="agocaraḥ|bahuvrīhi → adj. · nom. sg. m.|a- + go-cara 'range'|beyond the reach of, inaccessible">agocaraḥ<span class="g">nom</span></span>
+      <span class="danda">||</span>
+    </div>
+
+    <!-- WORD-BY-WORD with Sanskrit -->
+    <div class="wbw">
+      <div class="wbw-title">Word-by-word</div>
+      From whom (<span class="sk-inline">yataḥ</span>) omniscience (<span class="sk-inline">sarvajñatvam</span>) arises (<span class="sk-inline">prabhavati</span>), from whom (<span class="sk-inline">yataḥ</span>) universal agency (<span class="sk-inline">akhilakartṛtā</span>) extends forth (<span class="sk-inline">prasarati</span>), and (<span class="sk-inline">ca</span>) likewise (<span class="sk-inline">tathā</span>) from whom (<span class="sk-inline">yataḥ</span>) that (<span class="sk-inline">asau</span>) supreme (<span class="sk-inline">parā</span>) intuition (<span class="sk-inline">pratibhā</span>) [arises] in action (<span class="sk-inline">kārye</span>) — I meditate upon (<span class="sk-inline">smarāmi</span>) that (<span class="sk-inline">tad</span>) unconditioned (<span class="sk-inline">nirupadhi</span>) supreme (<span class="sk-inline">param</span>) peaceful (<span class="sk-inline">śāntam</span>) abode (<span class="sk-inline">dhāma</span>) of the Lord (<span class="sk-inline">īśituḥ</span>), of the all-pervading one (<span class="sk-inline">vibhoḥ</span>) who (<span class="sk-inline">yad</span>) himself (<span class="sk-inline">svayam</span>) even (<span class="sk-inline">api</span>) [is] beyond the reach (<span class="sk-inline">agocaraḥ</span>) of the words (<span class="sk-inline">girām</span>) of Vāgīśvarī (<span class="sk-inline">vāgīśvaryāḥ</span>).
+    </div>
+
+    <!-- SMOOTH TRANSLATION -->
+    <div class="transl">
+      From whom omniscience arises, from whom universal agency extends forth, and likewise from whom that supreme intuition [arises] in every action — I meditate upon that unconditioned, supreme, peaceful abode of the Lord, of the all-pervading one who himself is beyond the reach of the words even of Vāgīśvarī.
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab(this, 'v1')">Semantic Tree</button>
+      <button class="tab-btn" onclick="switchTab(this, 'v1')">Sandhi</button>
+      <button class="tab-btn" onclick="switchTab(this, 'v1')">Vocabulary</button>
+      <button class="tab-btn" onclick="switchTab(this, 'v1')">Notes</button>
+    </div>
+
+    <div class="tab-panel active" data-parent="v1">
+      <div class="tree">
+        <ul>
+          <li>
+            <span class="nw c-verb">prabhavati</span> <span class="nr">PRED₁</span> <span class="ng">"arises"</span>
+            <ul>
+              <li><span class="nw c-abstr">sarvajñatvam</span> <span class="nr">SUBJ</span> <span class="ng">"omniscience"</span></li>
+              <li><span class="nw c-pron">yataḥ</span> <span class="nr">SOURCE</span> <span class="ng">"from whom"</span></li>
+            </ul>
+          </li>
+          <li>
+            <span class="nw c-verb">prasarati</span> <span class="nr">PRED₂</span> <span class="ng">"extends forth"</span>
+            <ul>
+              <li><span class="nw c-abstr">akhilakartṛtā</span> <span class="nr">SUBJ</span> <span class="ng">"universal agency"</span></li>
+              <li><span class="nw c-pron">yataḥ</span> <span class="nr">SOURCE</span></li>
+            </ul>
+          </li>
+          <li>
+            <span class="nw c-verb">[prabhavati]</span> <span class="nr">PRED₃ (implied)</span>
+            <ul>
+              <li><span class="nw c-noun">pratibhā</span> <span class="nr">SUBJ</span> <span class="ng">"intuition"</span>
+                <ul>
+                  <li><span class="nw c-ptcp">parā</span> <span class="nr">ATTR</span> <span class="ng">"supreme"</span></li>
+                  <li><span class="nw c-pron">asau</span> <span class="nr">DET</span> <span class="ng">"that"</span></li>
+                </ul>
+              </li>
+              <li><span class="nw c-noun">kārye</span> <span class="nr">LOC</span> <span class="ng">"in action"</span></li>
+              <li><span class="nw c-indecl">tathā … ca</span> <span class="nr">CONJ</span> <span class="ng">"and likewise"</span></li>
+            </ul>
+          </li>
+          <li>
+            <span class="nw c-verb">smarāmi</span> <span class="nr">MAIN PRED</span> <span class="ng">"I meditate upon"</span>
+            <ul>
+              <li><span class="nw c-noun">dhāma</span> <span class="nr">OBJ</span> <span class="ng">"abode"</span>
+                <ul>
+                  <li><span class="nw c-cmpd">nirupadhi</span> <span class="nr">ATTR</span> <span class="ng">"unconditioned"</span></li>
+                  <li><span class="nw c-ptcp">param śāntam</span> <span class="nr">ATTR</span> <span class="ng">"supreme, peaceful"</span></li>
+                  <li><span class="nw c-pron">tad</span> <span class="nr">DET</span></li>
+                </ul>
+              </li>
+              <li><span class="nw c-noun">īśituḥ</span> <span class="nr">GEN</span> <span class="ng">"of the Lord"</span>
+                <ul>
+                  <li><span class="nw c-noun">vibhoḥ</span> <span class="nr">APPOS</span> <span class="ng">"of the all-pervading one"</span>
+                    <ul>
+                      <li><span class="nw c-cmpd">agocaraḥ</span> <span class="nr">REL.CL</span> <span class="ng">"beyond the reach"</span>
+                        <ul>
+                          <li><span class="nw c-noun">girām</span> <span class="nr">GEN</span> <span class="ng">"of words"</span>
+                            <ul><li><span class="nw c-noun">vāgīśvaryāḥ</span> <span class="nr">GEN</span> <span class="ng">"of Vāgīśvarī"</span></li></ul>
+                          </li>
+                          <li><span class="nw c-pron">svayam api</span> <span class="nr">EMPH</span> <span class="ng">"himself even"</span></li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-parent="v1">
+      <div class="sandhi-box">
+        <div class="sh-title">Sandhi Resolution</div>
+        <div class="si"><span class="sf">yato 'khila-</span> <span class="sa">→</span> <span class="st">yataḥ akhila-</span> <span class="sr">· visarga sandhi (aḥ + a → o ')</span></div>
+        <div class="si"><span class="sf">cāsau</span> <span class="sa">→</span> <span class="st">ca asau</span> <span class="sr">· vowel sandhi (a + a → ā)</span></div>
+        <div class="si"><span class="sf">dīkṣaiva</span> <span class="sa">→</span> <span class="st">dīkṣā eva</span> <span class="sr">· vowel sandhi (ā + e → ai)</span></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-parent="v1">
+      <div class="vocab-grid">
+        <div class="ve"><span class="ve-w">prabhavati</span> <span class="ve-r">√bhū 1P</span> <span class="ve-m">arises, originates</span></div>
+        <div class="ve"><span class="ve-w">sarvajñatva</span> <span class="ve-r">sarva+jña+tva</span> <span class="ve-m">omniscience</span></div>
+        <div class="ve"><span class="ve-w">akhilakartṛtā</span> <span class="ve-r">a-khila+kartṛ+tā</span> <span class="ve-m">universal agency</span></div>
+        <div class="ve"><span class="ve-w">prasarati</span> <span class="ve-r">√sṛ 1P</span> <span class="ve-m">extends forth</span></div>
+        <div class="ve"><span class="ve-w">pratibhā</span> <span class="ve-r">prati+√bhā</span> <span class="ve-m">intuition, creative insight</span></div>
+        <div class="ve"><span class="ve-w">dhāman</span> <span class="ve-r">√dhā</span> <span class="ve-m">abode, radiance, light</span></div>
+        <div class="ve"><span class="ve-w">smarāmi</span> <span class="ve-r">√smṛ 1P</span> <span class="ve-m">I meditate upon</span></div>
+        <div class="ve"><span class="ve-w">nirupadhi</span> <span class="ve-r">nis+upadhi</span> <span class="ve-m">unconditioned</span></div>
+        <div class="ve"><span class="ve-w">īśitṛ</span> <span class="ve-r">√īś+tṛ</span> <span class="ve-m">ruler, Lord</span></div>
+        <div class="ve"><span class="ve-w">vibhu</span> <span class="ve-r">vi+√bhū</span> <span class="ve-m">all-pervading</span></div>
+        <div class="ve"><span class="ve-w">agocara</span> <span class="ve-r">a+go+cara</span> <span class="ve-m">beyond the range of</span></div>
+        <div class="ve"><span class="ve-w">gir</span> <span class="ve-r">√gṝ</span> <span class="ve-m">speech, word</span></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-parent="v1">
+      <div class="note-box">
+        <div class="n-title">Structure</div>
+        <p>The verse opens with a triple <em>yataḥ</em>-clause — three divine attributes (omniscience, universal agency, supreme intuition) traced to the same unnamed source. The correlative pronoun <strong>yataḥ</strong> appears three times without resolution; its antecedent (<em>tad … dhāma</em>) arrives only in pāda c. This suspended syntax creates the devotional tension characteristic of stotras. The main clause is <strong>smarāmi tad dhāma</strong> ("I meditate upon that abode") — everything else is subordinate.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║  2 · PROSE TRANSITION (vṛtti) — commentary on maṅgala      ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="verse-card" id="v2" style="border-left-color: var(--comm-accent);">
+  <div class="verse-header" style="background: #f5f3ff; border-bottom-color: #e9e5f5;">
+    <div class="verse-num" style="background: var(--comm-accent);">2</div>
+    <div class="verse-label" style="color: var(--comm-accent);">Vṛtti — opening the Yogapāda <span class="type-tag tag-comm">comm.</span></div>
+  </div>
+  <div class="verse-body">
+
+    <div class="sk-block">
+      <span class="t indecl" data-tip="atha|indeclinable (auspicious incipit)||now, then — marks a new beginning">atha</span>
+      <span class="t indecl" data-tip="idānīm|indeclinable (temporal adverb)||now, at this time">idānīm</span>
+      <span class="t cmpd" data-tip="yogapādaḥ|tatpuruṣa · nom. sg. m.|yoga + pāda 'chapter'|the chapter on yoga">yogapādaḥ<span class="g">nom</span></span>
+      <span class="t verb" data-tip="prārabhyate|verb · 3sg pres. passive|pra- + ā- + √rabh (1Ā)|is begun, commences">prārabhyate<span class="g">3sg.pass</span></span>
+      <span class="danda">|</span>
+      <span class="t indecl" data-tip="tatra|locative pronoun (indecl.)||there, in that context">tatra</span>
+      <span class="t indecl" data-tip="tāvat|correlative indecl.||first of all, for now">tāvat</span> —
+    </div>
+
+    <div class="wbw">
+      <div class="wbw-title">Word-by-word</div>
+      Now (<span class="sk-inline">atha</span>), at this time (<span class="sk-inline">idānīm</span>), the yoga chapter (<span class="sk-inline">yogapādaḥ</span>) is begun (<span class="sk-inline">prārabhyate</span>). There (<span class="sk-inline">tatra</span>), first of all (<span class="sk-inline">tāvat</span>) —
+    </div>
+
+    <div class="transl">
+      So then, now the Yogapāda commences. There, first of all:
+    </div>
+
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab(this, 'v2')">Sandhi</button>
+      <button class="tab-btn" onclick="switchTab(this, 'v2')">Notes</button>
+    </div>
+
+    <div class="tab-panel active" data-parent="v2">
+      <div class="sandhi-box">
+        <div class="sh-title">Sandhi Resolution</div>
+        <div class="si"><span class="sf">athedānīṃ</span> <span class="sa">→</span> <span class="st">atha idānīm</span> <span class="sr">· vowel sandhi (a + i → e); anusvāra → m</span></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-parent="v2">
+      <div class="note-box">
+        <div class="n-title">Usage</div>
+        <p><strong>atha</strong> is the traditional auspicious particle for opening a new topic. Doubled with <strong>idānīm</strong>, it signals a major new section. <strong>tatra tāvat</strong> is a commentarial formula ("in that regard, first of all") introducing a preliminary discussion before the main verse is cited.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║  3 · ROOT VERSE (cited by commentator)                      ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+<div class="verse-card" id="v3">
+  <div class="verse-header">
+    <div class="verse-num">3</div>
+    <div class="verse-label">Verse cited by the commentator <span class="type-tag tag-verse">mūla</span></div>
+  </div>
+  <div class="verse-body">
+
+    <div class="sk-block">
+      <!-- pāda ab -->
+      <span class="t pron" data-tip="asmāt|dem. pron. · abl. sg. m.||from this">asmāt<span class="g">abl</span></span>
+      <span class="t ptcp" data-tip="pravitatāt|PPP → adj. · abl. sg. m.|pra- + vi- + √tan (8U) 'spread'|from that which is spread out, extended">pravitatāt<span class="g">abl</span></span>
+      <span class="t noun" data-tip="bandhāt|noun · abl. sg. m.|√bandh 'bind'|from bondage, from the fetter">bandhāt<span class="g">abl</span></span>
+      <span class="t cmpd" data-tip="parasaṃkhyānirodhakāt|tatpuruṣa · abl. sg. m.|para 'highest' + saṃkhyā 'state' + nirodhaka (ni+√rudh) 'blocker'|which blocks the highest state">parasaṃkhyānirodhakāt<span class="g">abl</span></span>
+      <span class="danda">|</span>
+      <span class="vbr"></span>
+      <!-- pāda cd -->
+      <span class="t noun" data-tip="dīkṣā|noun · nom. sg. f.|√dīkṣ|initiation, consecration">dīkṣā<span class="g">nom</span></span>
+      <span class="t indecl" data-tip="eva|restrictive particle||only, alone — doctrinally significant">eva</span>
+      <span class="t verb" data-tip="mocayati|verb · 3sg pres. causative|√muc (6P) caus.|liberates, causes to release">mocayati<span class="g">3sg.caus</span></span>
+      <span class="t indecl" data-tip="ūrdhvam|adverb (indecl.)||upwards, above">ūrdhvam</span>
+      <span class="t ptcp" data-tip="śaivam|adj. · acc. sg. n.|śiva + -a (taddhita)|belonging to Śiva, Śaiva">śaivam<span class="g">acc</span></span>
+      <span class="t noun" data-tip="dhāma|noun · acc. sg. n.|√dhā|abode, radiance">dhāma<span class="g">acc</span></span>
+      <span class="t verb" data-tip="nayati|verb · 3sg pres. indic.|√nī (1P)|leads, conveys">nayati<span class="g">3sg</span></span>
+      <span class="t indecl" data-tip="api|particle||also, and also">api</span>
+      <span class="danda">||</span>
+    </div>
+
+    <div class="wbw">
+      <div class="wbw-title">Word-by-word</div>
+      Initiation (<span class="sk-inline">dīkṣā</span>) alone (<span class="sk-inline">eva</span>) liberates (<span class="sk-inline">mocayati</span>) [the soul] from this (<span class="sk-inline">asmāt</span>) extended (<span class="sk-inline">pravitatāt</span>) bondage (<span class="sk-inline">bandhāt</span>) which blocks the highest state (<span class="sk-inline">parasaṃkhyānirodhakāt</span>), and also (<span class="sk-inline">api</span>) leads (<span class="sk-inline">nayati</span>) [the soul] upwards (<span class="sk-inline">ūrdhvam</span>) to the Śaiva (<span class="sk-inline">śaivam</span>) abode (<span class="sk-inline">dhāma</span>).
+    </div>
+
+    <div class="transl">
+      Initiation alone liberates from this extended bondage which blocks the highest state, and also leads [the soul] upwards to the abode of Śiva.
+    </div>
+
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab(this, 'v3')">Semantic Tree</button>
+      <button class="tab-btn" onclick="switchTab(this, 'v3')">Sandhi</button>
+      <button class="tab-btn" onclick="switchTab(this, 'v3')">Vocabulary</button>
+      <button class="tab-btn" onclick="switchTab(this, 'v3')">Notes</button>
+    </div>
+
+    <div class="tab-panel active" data-parent="v3">
+      <div class="tree">
+        <ul>
+          <li>
+            <span class="nw c-noun">dīkṣā</span> <span class="nr">SUBJ</span> <span class="ng">"initiation"</span>
+            <ul><li><span class="nw c-indecl">eva</span> <span class="nr">RESTRICT</span> <span class="ng">"alone"</span></li></ul>
+          </li>
+          <li>
+            <span class="nw c-verb">mocayati</span> <span class="nr">PRED₁ (caus.)</span> <span class="ng">"liberates"</span>
+            <ul>
+              <li><span class="nw c-noun">bandhāt</span> <span class="nr">ABL (source)</span> <span class="ng">"from bondage"</span>
+                <ul>
+                  <li><span class="nw c-pron">asmāt</span> <span class="nr">DET</span> <span class="ng">"this"</span></li>
+                  <li><span class="nw c-ptcp">pravitatāt</span> <span class="nr">ATTR</span> <span class="ng">"extended"</span></li>
+                  <li><span class="nw c-cmpd">para-saṃkhyā-nirodhakāt</span> <span class="nr">ATTR</span> <span class="ng">"blocking the highest state"</span></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <span class="nw c-verb">nayati</span> <span class="nr">PRED₂</span> <span class="ng">"leads"</span>
+            <ul>
+              <li><span class="nw c-indecl">api</span> <span class="nr">ADD</span> <span class="ng">"also"</span></li>
+              <li><span class="nw c-indecl">ūrdhvam</span> <span class="nr">DIR</span> <span class="ng">"upwards"</span></li>
+              <li><span class="nw c-noun">dhāma</span> <span class="nr">GOAL (acc.)</span> <span class="ng">"to the abode"</span>
+                <ul><li><span class="nw c-ptcp">śaivam</span> <span class="nr">ATTR</span> <span class="ng">"of Śiva"</span></li></ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-parent="v3">
+      <div class="sandhi-box">
+        <div class="sh-title">Sandhi Resolution</div>
+        <div class="si"><span class="sf">dīkṣaiva</span> <span class="sa">→</span> <span class="st">dīkṣā eva</span> <span class="sr">· vowel sandhi (ā + e → ai)</span></div>
+        <div class="si"><span class="sf">mocayaty ūrdhvaṃ</span> <span class="sa">→</span> <span class="st">mocayati ūrdhvam</span> <span class="sr">· semivowel sandhi (i + ū → y ū)</span></div>
+        <div class="si"><span class="sf">nayaty api</span> <span class="sa">→</span> <span class="st">nayati api</span> <span class="sr">· semivowel sandhi (i + a → y a)</span></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-parent="v3">
+      <div class="vocab-grid">
+        <div class="ve"><span class="ve-w">pravitata</span> <span class="ve-r">pra+vi+√tan</span> <span class="ve-m">spread out, extended</span></div>
+        <div class="ve"><span class="ve-w">bandha</span> <span class="ve-r">√bandh</span> <span class="ve-m">bondage, fetter</span></div>
+        <div class="ve"><span class="ve-w">nirodhaka</span> <span class="ve-r">ni+√rudh+aka</span> <span class="ve-m">obstructor, blocker</span></div>
+        <div class="ve"><span class="ve-w">dīkṣā</span> <span class="ve-r">√dīkṣ</span> <span class="ve-m">initiation, consecration</span></div>
+        <div class="ve"><span class="ve-w">mocayati</span> <span class="ve-r">√muc caus.</span> <span class="ve-m">liberates, sets free</span></div>
+        <div class="ve"><span class="ve-w">nayati</span> <span class="ve-r">√nī 1P</span> <span class="ve-m">leads, conveys</span></div>
+        <div class="ve"><span class="ve-w">ūrdhvam</span> <span class="ve-r">—</span> <span class="ve-m">upwards, above</span></div>
+        <div class="ve"><span class="ve-w">dhāman</span> <span class="ve-r">√dhā</span> <span class="ve-m">abode, radiance</span></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-parent="v3">
+      <div class="note-box">
+        <div class="n-title">Doctrinal Note</div>
+        <p>Two functions of <em>dīkṣā</em> in Saiddhāntika theology: <strong>(1)</strong> it <em>liberates</em> (mocayati) from bondage (<em>pāśa</em>), and <strong>(2)</strong> it <em>leads</em> (nayati) the soul to Śiva's abode. The particle <strong>eva</strong> is doctrinally significant — it asserts that initiation is the <em>sole</em> means to liberation. Sanderson translates <em>parasaṃkhyā</em> as "the highest state."</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── NESTED COMMENTARY on verse 3 ── -->
+  <div class="comm-card" id="v3c">
+    <div class="comm-header">
+      <div class="comm-marker">VṚTTI</div>
+      <div class="comm-label">Commentary on the verse above</div>
+    </div>
+    <div class="comm-body">
+
+      <div class="sk-block" style="font-size: 1.15rem;">
+        <span class="t indecl" data-tip="iti|quotative indecl.||thus (marks end of cited verse)">iti</span>
+        <span class="t noun" data-tip="śruteḥ|noun · gen./abl. sg. f.|√śru → śruti|according to scripture">śruteḥ<span class="g">gen</span></span>
+        <span class="t noun" data-tip="dīkṣāyāḥ|noun · gen. sg. f.|√dīkṣ|of initiation">dīkṣāyāḥ<span class="g">gen</span></span>
+        <span class="t indecl" data-tip="eva|restrictive particle||only, alone">eva</span>
+        <span class="t cmpd" data-tip="niratiśaya-kaivalya-avāpti-hetutvāt|tatpuruṣa chain · abl. sg. n. (causal)|nir-atiśaya 'unsurpassed' + kaivalya 'liberation' + avāpti (ā+√āp) 'attainment' + hetu 'cause' + -tva → -tvāt|because of being the cause of the attainment of unsurpassed liberation">niratiśaya-kaivalya-avāpti-hetutvāt<span class="g">abl</span></span>
+      </div>
+
+      <div class="wbw">
+        <div class="wbw-title">Word-by-word</div>
+        [Because,] according to scripture (<span class="sk-inline">śruteḥ</span>), thus (<span class="sk-inline">iti</span>) [having cited the verse], initiation (<span class="sk-inline">dīkṣāyāḥ</span>) alone (<span class="sk-inline">eva</span>) [is] the cause of the attainment of unsurpassed liberation (<span class="sk-inline">niratiśaya-kaivalya-avāpti-hetutvāt</span>) —
+      </div>
+
+      <div class="transl">
+        Because, according to scripture, initiation alone is the cause of the attainment of unsurpassed isolation (kaivalya) —
+      </div>
+
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="switchTab(this, 'v3c')">Semantic Tree</button>
+        <button class="tab-btn" onclick="switchTab(this, 'v3c')">Compound Analysis</button>
+        <button class="tab-btn" onclick="switchTab(this, 'v3c')">Vocabulary</button>
+        <button class="tab-btn" onclick="switchTab(this, 'v3c')">Notes</button>
+      </div>
+
+      <div class="tab-panel active" data-parent="v3c">
+        <div class="tree">
+          <ul>
+            <li>
+              <span class="nw c-cmpd">niratiśaya-kaivalya-avāpti-hetutvāt</span> <span class="nr">REASON (causal abl.)</span> <span class="ng">"because of being the cause of attaining unsurpassed liberation"</span>
+              <ul>
+                <li><span class="nw c-noun">dīkṣāyāḥ</span> <span class="nr">GEN (agent)</span> <span class="ng">"of initiation"</span>
+                  <ul><li><span class="nw c-indecl">eva</span> <span class="nr">RESTRICT</span> <span class="ng">"alone"</span></li></ul>
+                </li>
+                <li><span class="nw c-noun">śruteḥ</span> <span class="nr">SOURCE (authority)</span> <span class="ng">"according to scripture"</span></li>
+                <li><span class="nw c-indecl">iti</span> <span class="nr">QUOTE-END</span> <span class="ng">"thus [having cited]"</span></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-parent="v3c">
+        <div class="sandhi-box">
+          <div class="sh-title">Compound Breakdown</div>
+          <div class="si" style="line-height: 1.7;">
+            <span class="sf">niratiśayakaivalyāvāptihetutvāt</span><br>
+            <span class="sa" style="margin-left:0">→</span>
+            <span class="st">nir-atiśaya — kaivalya — avāpti — hetu — -tvāt</span>
+          </div>
+          <div style="margin-top:0.5rem; font-size:0.8rem; color: #57534e; line-height: 1.7;">
+            <strong>nir-atiśaya</strong> — "unsurpassed" (bahuvrīhi: "not having a surpasser")<br>
+            <strong>kaivalya</strong> — "isolation, absolute liberation" (kevala + -ya)<br>
+            <strong>avāpti</strong> — "attainment" (ā + √āp + -ti)<br>
+            <strong>hetu</strong> — "cause, reason"<br>
+            <strong>-tva → -tvāt</strong> — abstract suffix, abl. "because of being the cause"
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-parent="v3c">
+        <div class="vocab-grid">
+          <div class="ve"><span class="ve-w">śruti</span> <span class="ve-r">√śru</span> <span class="ve-m">scripture, revealed text</span></div>
+          <div class="ve"><span class="ve-w">niratiśaya</span> <span class="ve-r">nis+ati+√śī</span> <span class="ve-m">unsurpassed</span></div>
+          <div class="ve"><span class="ve-w">kaivalya</span> <span class="ve-r">kevala+ya</span> <span class="ve-m">isolation, liberation</span></div>
+          <div class="ve"><span class="ve-w">avāpti</span> <span class="ve-r">ā+√āp+ti</span> <span class="ve-m">attainment</span></div>
+          <div class="ve"><span class="ve-w">hetu</span> <span class="ve-r">—</span> <span class="ve-m">cause, reason</span></div>
+          <div class="ve"><span class="ve-w">-tva / -tvāt</span> <span class="ve-r">abstract sfx.</span> <span class="ve-m">"-ness"; abl. = "because of"</span></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-parent="v3c">
+        <div class="note-box">
+          <div class="n-title">Grammatical Note</div>
+          <p>A classic <strong>nested tatpuruṣa chain</strong> — built right-to-left: the <em>hetu-tva</em> ("cause-ness") of <em>avāpti</em> ("attainment") of <em>kaivalya</em> ("liberation") that is <em>nir-atiśaya</em> ("unsurpassed"). The causal ablative <strong>-tvāt</strong> answers "why?" This is a suspended clause that continues in the next sentence.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /container -->
+
+<!-- ═══════════ GLOBAL TOOLTIP (appended to body, never clipped) ═══════════ -->
+<div class="tip" id="globalTip"></div>
+
+<script>
+// ── Tab switching: one replaces another ──
+function switchTab(btn, parentId) {
+  const parent = document.getElementById(parentId);
+  // deactivate all buttons in this bar
+  const bar = btn.closest('.tabs-bar');
+  bar.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  // find index of clicked button
+  const idx = Array.from(bar.children).indexOf(btn);
+
+  // hide all panels for this parent, show the right one
+  const panels = parent.querySelectorAll('.tab-panel[data-parent="' + parentId + '"]');
+  // But panels could be inside nested elements, so scope it better:
+  // Actually let's just get all panels that follow this tabs-bar
+  let sibling = bar.nextElementSibling;
+  let panelIdx = 0;
+  while (sibling && sibling.classList.contains('tab-panel')) {
+    if (panelIdx === idx) {
+      sibling.classList.add('active');
+    } else {
+      sibling.classList.remove('active');
+    }
+    panelIdx++;
+    sibling = sibling.nextElementSibling;
+  }
+}
+
+// ── Tooltip system: fixed-position, appended to body ──
+const tip = document.getElementById('globalTip');
+
+document.addEventListener('mouseover', function(e) {
+  const token = e.target.closest('.t');
+  if (!token) return;
+  const data = token.getAttribute('data-tip');
+  if (!data) return;
+
+  const parts = data.split('|');
+  let html = '<span class="tw">' + parts[0] + '</span>';
+  if (parts[1]) html += '<span class="tg">' + parts[1] + '</span>';
+  if (parts[2]) html += '<span class="tr">' + parts[2] + '</span>';
+  if (parts[3]) html += '<span class="tm">' + parts[3] + '</span>';
+  tip.innerHTML = html;
+  tip.classList.add('show');
+
+  const rect = token.getBoundingClientRect();
+  let left = rect.left + rect.width / 2 - tip.offsetWidth / 2;
+  let top = rect.top - tip.offsetHeight - 10;
+
+  // Keep within viewport
+  if (left < 8) left = 8;
+  if (left + tip.offsetWidth > window.innerWidth - 8) left = window.innerWidth - tip.offsetWidth - 8;
+  if (top < 8) top = rect.bottom + 10; // flip below if no room above
+
+  tip.style.left = left + 'px';
+  tip.style.top = top + 'px';
+});
+
+document.addEventListener('mouseout', function(e) {
+  const token = e.target.closest('.t');
+  if (token) {
+    tip.classList.remove('show');
+  }
+});
+</script>
+</body>
+</html>
