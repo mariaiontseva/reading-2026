@@ -48,10 +48,10 @@
     background: var(--bg);
     color: var(--text);
     line-height: 1.7;
-    padding: 2.5rem 1rem 4rem;
+    padding: 0 0 4rem;
   }
 
-  .container { max-width: 920px; margin: 0 auto; }
+  .container { max-width: 920px; margin: 0 auto; padding: 0 1rem; }
 
   /* ── Header ── */
   header {
@@ -333,67 +333,67 @@
   /* ═══════════════ GLOBAL TEXT NAV ═══════════════ */
   .global-nav {
     position: sticky; top: 0; z-index: 500;
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-    margin: -2.5rem -1rem 2rem;
-    width: calc(100% + 2rem);
+    background: #1e1b18;
+    width: 100%;
   }
   .global-nav-inner {
-    max-width: 920px;
-    margin: 0 auto;
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
   }
   .global-tab {
-    font-family: 'Crimson Pro', Georgia, serif;
-    font-size: 1.05rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
     font-weight: 400;
-    color: var(--text3);
-    background: none;
+    color: #78716c;
+    background: #1e1b18;
     border: none;
-    padding: 1rem 1.5rem 0.85rem;
+    border-right: 1px solid #292524;
+    padding: 0.9rem 1rem;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color 0.2s, border-color 0.2s;
-    white-space: nowrap;
-    letter-spacing: -0.01em;
+    transition: background 0.2s, color 0.2s;
+    text-align: center;
+    line-height: 1.4;
   }
+  .global-tab:last-child { border-right: none; }
   .global-tab:hover {
-    color: var(--text2);
+    background: #292524;
+    color: #d6d3d1;
   }
   .global-tab.active {
-    color: var(--text);
+    background: #292524;
+    color: #fafaf9;
+    box-shadow: inset 0 -3px 0 #d97706;
+  }
+  .global-tab .gt-title {
+    display: block;
+    font-size: 0.95rem;
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .global-tab.active .gt-title {
     font-weight: 600;
-    border-bottom-color: var(--text);
+    color: #ffffff;
   }
   .global-tab .gt-sub {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.62rem;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--text3);
     display: block;
-    margin-top: 0.05rem;
+    font-size: 0.65rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    margin-top: 0.15rem;
+    opacity: 0.6;
   }
   .global-tab.active .gt-sub {
-    color: var(--text2);
+    opacity: 0.8;
+    color: #fcd34d;
   }
 
-  .text-section {
-    display: none;
-    animation: sectionIn 0.25s ease;
-  }
+  .text-section { display: none; }
   .text-section.active { display: block; }
-  @keyframes sectionIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
 
   .placeholder-section {
     text-align: center;
-    padding: 5rem 2rem;
-    color: var(--text3);
+    padding: 6rem 2rem;
   }
   .placeholder-section h2 {
     font-size: 1.8rem;
@@ -402,18 +402,18 @@
     margin-bottom: 0.3rem;
   }
   .placeholder-section .ph-sub {
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-style: italic;
     color: var(--text3);
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
   }
   .placeholder-section .ph-status {
     font-family: 'Inter', sans-serif;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     color: var(--text3);
-    background: #f5f5f4;
+    background: var(--card);
     display: inline-block;
-    padding: 0.4rem 1rem;
+    padding: 0.45rem 1.2rem;
     border-radius: 20px;
     border: 1px solid var(--border);
   }
@@ -424,36 +424,37 @@
     .sk-block { font-size: 1.08rem; padding: 0.7rem; }
     .comm-card { margin-left: 0.5rem; }
     .vocab-grid { grid-template-columns: 1fr; }
-    .global-nav { margin: -1rem -0.5rem 1.5rem; width: calc(100% + 1rem); }
-    .global-tab { font-size: 0.9rem; padding: 0.8rem 0.8rem 0.65rem; }
+    .global-tab { padding: 0.7rem 0.5rem; }
+    .global-tab .gt-title { font-size: 0.8rem; }
     .global-tab .gt-sub { font-size: 0.55rem; }
   }
 </style>
 </head>
 <body>
-<div class="container">
 
-<!-- ═══════════════ GLOBAL NAV ═══════════════ -->
+<!-- ═══════════════ GLOBAL NAV (full-width, outside container) ═══════════════ -->
 <nav class="global-nav">
   <div class="global-nav-inner">
     <button class="global-tab active" onclick="switchText('mrigendra', this)">
-      Mṛgendratantra
+      <span class="gt-title">Mṛgendratantra</span>
       <span class="gt-sub">Yogapāda</span>
     </button>
     <button class="global-tab" onclick="switchText('pasupata', this)">
-      Pāśupatasūtra
-      <span class="gt-sub">with Pañcārthabhāṣya</span>
+      <span class="gt-title">Pāśupatasūtra</span>
+      <span class="gt-sub">Pañcārthabhāṣya</span>
     </button>
     <button class="global-tab" onclick="switchText('dharma', this)">
-      Dharmaśāstra
+      <span class="gt-title">Dharmaśāstra</span>
       <span class="gt-sub">selections</span>
     </button>
     <button class="global-tab" onclick="switchText('fourth', this)">
-      Text IV
+      <span class="gt-title">Text IV</span>
       <span class="gt-sub">to be added</span>
     </button>
   </div>
 </nav>
+
+<div class="container">
 
 <!-- ═══════════════ TEXT 1: MṚGENDRATANTRA ═══════════════ -->
 <div class="text-section active" id="sec-mrigendra">
