@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mṛgendratantra — Yogapāda · Sentence Reader</title>
+<title>Sanskrit Sentence Reader — 2026</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
 
@@ -330,17 +330,132 @@
     color: #166534; margin-bottom: 0.25rem;
   }
 
+  /* ═══════════════ GLOBAL TEXT TABS (top nav) ═══════════════ */
+  .global-nav {
+    position: sticky; top: 0; z-index: 500;
+    background: #1c1917;
+    border-bottom: 2px solid #292524;
+    padding: 0;
+    margin: -2.5rem -1rem 0;
+    width: calc(100% + 2rem);
+  }
+  .global-nav-inner {
+    max-width: 920px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0;
+  }
+  .global-tab {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #a8a29e;
+    background: none;
+    border: none;
+    padding: 0.85rem 1.3rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+    position: relative;
+  }
+  .global-tab:hover {
+    color: #e7e5e4;
+    background: #292524;
+  }
+  .global-tab.active {
+    color: #ffffff;
+    border-bottom-color: #f59e0b;
+    font-weight: 600;
+  }
+  .global-tab .gt-num {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    background: #44403c;
+    color: #a8a29e;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 18px;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+  }
+  .global-tab.active .gt-num {
+    background: #f59e0b;
+    color: #1c1917;
+  }
+  .global-tab .gt-badge {
+    font-size: 0.58rem;
+    font-weight: 600;
+    color: #78716c;
+    background: #292524;
+    padding: 0.08rem 0.35rem;
+    border-radius: 3px;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+  }
+  .global-tab.active .gt-badge {
+    color: #d97706;
+    background: #451a03;
+  }
+
+  .text-section { display: none; }
+  .text-section.active { display: block; }
+
+  .placeholder-section {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text3);
+  }
+  .placeholder-section h2 {
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 0.5rem;
+  }
+  .placeholder-section p {
+    font-size: 1.05rem;
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
   /* ── Responsive ── */
   @media (max-width: 640px) {
     body { padding: 1rem 0.5rem; }
     .sk-block { font-size: 1.08rem; padding: 0.7rem; }
     .comm-card { margin-left: 0.5rem; }
     .vocab-grid { grid-template-columns: 1fr; }
+    .global-nav { margin: -1rem -0.5rem 0; width: calc(100% + 1rem); }
+    .global-tab { font-size: 0.72rem; padding: 0.7rem 0.7rem; }
+    .global-tab .gt-badge { display: none; }
   }
 </style>
 </head>
 <body>
 <div class="container">
+
+<!-- ═══════════════ GLOBAL NAV ═══════════════ -->
+<nav class="global-nav">
+  <div class="global-nav-inner">
+    <button class="global-tab active" onclick="switchText('mrigendra')">
+      <span class="gt-num">1</span>Mṛgendratantra<span class="gt-badge">Yogapāda</span>
+    </button>
+    <button class="global-tab" onclick="switchText('pasupata')">
+      <span class="gt-num">2</span>Pāśupatasūtra<span class="gt-badge">coming soon</span>
+    </button>
+    <button class="global-tab" onclick="switchText('dharma')">
+      <span class="gt-num">3</span>Dharmaśāstra<span class="gt-badge">coming soon</span>
+    </button>
+    <button class="global-tab" onclick="switchText('fourth')">
+      <span class="gt-num">4</span>Text IV<span class="gt-badge">coming soon</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════ TEXT 1: MṚGENDRATANTRA ═══════════════ -->
+<div class="text-section active" id="sec-mrigendra">
 
 <header>
   <h1>Mṛgendratantra — Yogapāda</h1>
@@ -774,12 +889,52 @@
 
 </div>
 
+</div><!-- /sec-mrigendra -->
+
+<!-- ═══════════════ TEXT 2: PĀŚUPATASŪTRA ═══════════════ -->
+<div class="text-section" id="sec-pasupata">
+  <div class="placeholder-section">
+    <h2>Pāśupatasūtra</h2>
+    <p>with the Pañcārthabhāṣya of Kauṇḍinya</p>
+    <p style="margin-top: 1.5rem; font-size: 0.95rem;">Sentences are being prepared. Check back soon.</p>
+  </div>
+</div>
+
+<!-- ═══════════════ TEXT 3: DHARMAŚĀSTRA ═══════════════ -->
+<div class="text-section" id="sec-dharma">
+  <div class="placeholder-section">
+    <h2>Dharmaśāstra</h2>
+    <p>Selections from the dharma literature</p>
+    <p style="margin-top: 1.5rem; font-size: 0.95rem;">Sentences are being prepared. Check back soon.</p>
+  </div>
+</div>
+
+<!-- ═══════════════ TEXT 4: TBD ═══════════════ -->
+<div class="text-section" id="sec-fourth">
+  <div class="placeholder-section">
+    <h2>Text IV</h2>
+    <p>To be determined</p>
+    <p style="margin-top: 1.5rem; font-size: 0.95rem;">Sentences are being prepared. Check back soon.</p>
+  </div>
+</div>
+
 </div><!-- /container -->
 
 <!-- ═══════════ GLOBAL TOOLTIP (appended to body, never clipped) ═══════════ -->
 <div class="tip" id="globalTip"></div>
 
 <script>
+// ── Global text switching ──
+function switchText(id) {
+  document.querySelectorAll('.text-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.global-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  // find the button that was clicked
+  event.currentTarget.classList.add('active');
+  // scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // ── Tab switching: one replaces another ──
 function switchTab(btn, parentId) {
   const parent = document.getElementById(parentId);
